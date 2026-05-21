@@ -80,7 +80,7 @@ check_datadir() {
         echo "WARN: $hr/data/configs/znc.conf not found." >&2
         echo "  Create config once (interactive):" >&2
         echo "    ZNC_PODMAN_ROOT=$hr $0 --makeconf" >&2
-        echo "  Or: podman run --rm -it -v $hr/data:/znc-data --network host $IMAGE_NAME znc --makeconf" >&2
+        echo "  Or: podman run --rm -it -v $hr/data:/znc-data --network host $IMAGE_NAME /opt/znc/bin/znc --makeconf --datadir /znc-data" >&2
     fi
 }
 
@@ -155,7 +155,7 @@ cmd_makeconf() {
         --user "$(id -u):$(id -g)" \
         -e TERM="${TERM:-xterm-256color}" \
         "$IMAGE_NAME" \
-        znc --makeconf
+        /opt/znc/bin/znc --makeconf --datadir /znc-data
 }
 
 ACTION="up"

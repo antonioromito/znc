@@ -44,7 +44,7 @@ if [[ -f "$ZNC_PODMAN_ROOT/data/configs/znc.conf" ]]; then
 fi
 
 podman rm -f "$CONTAINER_NAME" 2>/dev/null || true
-mkdir -p "$ZNC_PODMAN_ROOT/data"
+mkdir -p "$ZNC_PODMAN_ROOT/data/configs"
 
 export ZNC_NO_LAUNCH_AFTER_MAKECONF=1
 RUN_UID="$(id -u)"
@@ -56,13 +56,14 @@ log_user 1
 spawn podman run --rm -it \
     --network host \
     -v ${ZNC_PODMAN_ROOT}/data:/znc-data:Z \
-    --userns=keep-id:uid=${RUN_UID}:gid=${RUN_GID} \
+    --userns=keep-id:uid=${RUN_UID},gid=${RUN_GID} \
     --user ${RUN_UID}:${RUN_GID} \
     -e ZNC_NO_LAUNCH_AFTER_MAKECONF=1 \
     -e TERM=xterm \
-    ${IMAGE_NAME} znc --makeconf
+    ${IMAGE_NAME} /opt/znc/bin/znc --makeconf --datadir /znc-data
 
 expect {
+    "alternate location" { send "/znc-data/configs/znc.conf\r"; exp_continue }
     "Listen on port" { send "${ZNC_PORT}\r"; exp_continue }
     "Listen using SSL" { send "yes\r"; exp_continue }
     "Listen using both IPv4 and IPv6" { send "${ZNC_LISTEN_IPV6}\r"; exp_continue }
